@@ -1,20 +1,24 @@
 import pygame
 import sys
 import random
-import food.py
-import score.py
+from food import Food
+import score
+import config
 
 pygame.init()
 
 class Snake(object):
     def __init__(self):
         self.length = 1
-        self.positions = [(Width/2), (Height/2)]
-        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
-        self.color = green
+        self.positions = [(config.Width // 2, config.Height // 2)]
+        self.direction = random.choice([config.UP, config.DOWN, config.LEFT, config.RIGHT])
+        self.color = config.green
 
     def get_head_positions(self):
-        return self.positions[0]
+        if isinstance(self.positions[0], tuple):
+            return self.positions[0]
+        else:
+            raise TypeError("Error: Expected a tuple but got an integer. Check positions list.")
 
     def turn(self, point):
         if self.length > 1 and (point[0] * -1, point[1] * -1)  == self.direction:
@@ -23,11 +27,11 @@ class Snake(object):
             self.direction = point
 
     def move(self):
-        current  self.get_head_position()
+        current = self.get_head_positions()
         x, y = self.direction
-        new = (((cureent[0] + (x * Grid_Size)) % Width), (current[1] + (y * Grid_Size)) % Height)
-        if len(self.positions) > 2 and new in self.position[2:]
-        self.reset()
+        new = (((current[0] + (x * config.Grid_Size)) % config.Width), (current[1] + (y * config.Grid_Size)) % config.Height)
+        if len(self.positions) > 2 and new in self.positions[2:]:
+            self.reset()
         else:
             self.positions.insert(0, new)
             if len(self.positions) > self.length:
@@ -35,62 +39,44 @@ class Snake(object):
 
     def reset(self):
         self.length = 1
-        self.positions = [(Width/2), (Height/2)]
-        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
+        self.positions = [(config.Width/2), (config.Height/2)]
+        self.direction = random.choice([config.UP, config.DOWN, config.LEFT, config.RIGHT])
 
     def draw (self, surface):
         for pos in self.positions:
-            rect= pygame.Rect((pos[0], pos[1]), (Grid_Size, Grid_Size))
+            rect= pygame.Rect((pos[0], pos[1]), (config.Grid_Size, config.Grid_Size))
             pygame.draw.rect(surface, self.color, rect)
-            pygame.draw.rect(surface, black, rect, 3)
+            pygame.draw.rect(surface, config.black, rect, 3)
 
     def handle_keys(self):
         for event in pygame.event.get():
-            if event.type == pygame.Quit:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    self.turn(UP)
+                    self.turn(config.UP)
                 if event.key == pygame.K_DOWN:
-                    self.turn(DOWN)
+                    self.turn(config.DOWN)
                 if event.key == pygame.K_RIGHT:
-                    self.turn(RIGHT)
+                    self.turn(config.RIGHT)
                 if event.key == pygame.K_LEFT:
-                    self.turn(LEFT)
+                    self.turn(config.LEFT)
 
 def drawGrid(surface):
-    for y in range(0, int(Grid_Height)):
-        for x in range(0, int(Grid_Width)):
+    for y in range(0, int(config.Grid_Height)):
+        for x in range(0, int(config.Grid_Width)):
             if ((x +y) % 2) == 0:
-                rect = pygame.Rect((x * Grid_Size, y * Grid_Size), (Grid_Size, Grid_Size))
-                pygame.draw.rect(surface, blue1, rect)
+                rect = pygame.Rect((x * config.Grid_Size, y * config.Grid_Size), (config.Grid_Size, config.Grid_Size))
+                pygame.draw.rect(surface, config.blue1, rect)
             else:
-                rect = pygame.Rect((x * Grid_Size, y * Grid_Size), (Grid_Size, Grid_Size))
-                pygame.draw.rect(surface, red2, rect)
-
-
-#Game library variables
-Width = 580
-Height = 480
-Grid_Size = 20
-Grid_Width = Width / Grid_Size
-Grid_Height = Height / Grid_Size
-blue1 = (0, 0, 255)
-red2 = (255, 0, 0)
-green = (0, 255, 0)
-black = (0, 0, 0)
-orange = (255, 165, 0)
-UP = (0, -1)
-DOWN = (0, 1)
-LEFT = (-1, 0)
-RIGHT = (1, 0)
-font = pygame.font.Font('consola.ttf', 30)
+                rect = pygame.Rect((x * config.Grid_Size, y * config.Grid_Size), (config.Grid_Size, config.Grid_Size))
+                pygame.draw.rect(surface, config.red2, rect)
 
 def main():
     pygame.init()
     clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((Width, Height), 0, 32)
+    screen = pygame.display.set_mode((config.Width, config.Height), 0, 32)
 
     surface = pygame.Surface(screen.get_size())
     surface = surface.convert()
@@ -106,7 +92,7 @@ def main():
         snake.handle_keys()
         drawGrid(surface)
         snake.move()
-        if snake.get_head_position() == food.position:
+        if snake.get_head_positions() == food.position:
             snake.length += 1
             score += 1
             food.randomize_position()
